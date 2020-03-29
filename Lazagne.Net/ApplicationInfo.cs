@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Lazagne.Net
 {
-    class ApplicationInfo
+    public class ApplicationInfo
     {
         public string Name { get; set; }
-        public List<LoginInfo> Logins { get; set; }
+        public ICollection<LoginInfo> Logins { get; set; }
     }
 }
