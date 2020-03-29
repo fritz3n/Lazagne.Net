@@ -12,14 +12,29 @@ namespace Lazagne.Net.Modules.ChromiumBased
     {
         static ChromiumBased()
         {
-            ModuleHandler.Register(new ChromiumBased());
+            ModuleHandler.Register("Chromium Based", new ChromiumBased());
         }
 
         public IEnumerable<ApplicationInfo> GetCredentials()
         {
 
             foreach (Browser browser in Constants.Browsers)
-                yield return new ApplicationInfo() { Name = browser.Name, Logins = GetBrowserCredentials(browser).ToList() };
+            {
+                List<LoginInfo> logins;
+                try
+                {
+                    logins = GetBrowserCredentials(browser).ToList();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error with Browser module '{browser.Name}':\n" + e);
+                    continue;
+                }
+
+
+                if (logins.Count > 0)
+                    yield return new ApplicationInfo(browser.Name, logins);
+            }
         }
 
         private IEnumerable<LoginInfo> GetBrowserCredentials(Browser browser)
@@ -51,7 +66,7 @@ namespace Lazagne.Net.Modules.ChromiumBased
 
                     }
 
-                    yield return new LoginInfo() { Url = encryptedLogin.Url, Login = encryptedLogin.Login, Password = password };
+                    yield return new LoginInfo() { Url = encryptedLogin.Url, Login = encryptedLogin.Login, Password = password, AdditionalData = encryptedLogin.AdditionalData };
                 }
 
             }

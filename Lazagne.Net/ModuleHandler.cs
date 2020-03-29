@@ -8,7 +8,7 @@ namespace Lazagne.Net
 {
     static class ModuleHandler
     {
-        private static List<IModule> modules = new List<IModule>();
+        private static Dictionary<string, IModule> modules = new Dictionary<string, IModule>();
 
         static ModuleHandler()
         {
@@ -22,14 +22,24 @@ namespace Lazagne.Net
             }
         }
 
-        public static void Register(IModule module) => modules.Add(module);
+        public static void Register(string name, IModule module) => modules.Add(name, module);
 
         public static List<ApplicationInfo> GetCredentials()
         {
             List<ApplicationInfo> applications = new List<ApplicationInfo>();
 
-            foreach (IModule module in modules)
-                applications.AddRange(module.GetCredentials());
+            foreach (KeyValuePair<string, IModule> module in modules)
+            {
+                try
+                {
+                    applications.AddRange(module.Value.GetCredentials());
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error in module '{module.Key}':\n" + e);
+                    continue;
+                }
+            }
 
             return applications;
         }
