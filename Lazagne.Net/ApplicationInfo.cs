@@ -16,5 +16,19 @@ namespace Lazagne.Net
         }
 
         public static List<ApplicationInfo> Single(string name, List<LoginInfo> logins) => new List<ApplicationInfo>() { new ApplicationInfo(name, logins) };
+
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"### {Name} ###");
+            foreach (var login in Logins)
+            {
+                sb.AppendLine(login.ToString("\t"));
+            }
+
+            return sb.ToString();
+        }
+
     }
 }
