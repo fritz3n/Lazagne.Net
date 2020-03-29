@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Lazagne.Net
 {
-    class ApplicationInfo
+    public class ApplicationInfo
     {
         public string Name { get; set; }
-        public IEnumerable<LoginInfo> Logins { get; set; }
+        public ICollection<LoginInfo> Logins { get; set; }
 
         public ApplicationInfo(string name, List<LoginInfo> logins)
         {
