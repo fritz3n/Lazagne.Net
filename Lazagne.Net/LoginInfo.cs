@@ -9,7 +9,7 @@ namespace Lazagne.Net
         public string Url { get; set; }
         public string Login { get; set; }
         public string Password { get; set; }
-        public Dictionary<string, string> AdditionalData { get; set; }
+        public IDictionary<string, string> AdditionalData { get; set; }
 
         public LoginInfo(string url, string login, string password, Dictionary<string, string> additionalData = null)
         {

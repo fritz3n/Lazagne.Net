@@ -1,4 +1,5 @@
 ﻿using Lazagne.Net.Modules.Windows.CredMan.Unmanaged;
+using Lazagne.Net.Utillity;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,7 +24,7 @@ namespace Lazagne.Net.Modules.Windows.CredMan
                 if (credential.CredentialBlob.Length == 0)
                     continue;
 
-                string password = Encoding.UTF8.GetString(credential.CredentialBlob);
+                string password = AutoDecoder.Decode(credential.CredentialBlob);
                 logins.Add(new LoginInfo(credential.TargetName, credential.UserName, password));
             }
 
