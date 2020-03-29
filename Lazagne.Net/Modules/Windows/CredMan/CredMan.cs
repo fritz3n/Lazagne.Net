@@ -23,9 +23,21 @@ namespace Lazagne.Net.Modules.Windows.CredMan
             {
                 if (credential.CredentialBlob.Length == 0)
                     continue;
+                switch (credential.Type)
+                {
+                    case CRED_TYPE.DOMAIN_PASSWORD:
+                    case CRED_TYPE.DOMAIN_VISIBLE_PASSWORD:
+                    case CRED_TYPE.GENERIC:
+                        string password = AutoDecoder.Decode(credential.CredentialBlob);
+                        logins.Add(new LoginInfo(credential.TargetName, credential.UserName, password));
+                        break;
+                    default:
+                        string encPassword = BitConverter.ToString(credential.CredentialBlob); ;
+                        logins.Add(new LoginInfo(credential.TargetName, credential.UserName, encPassword, new Dictionary<string, string>() {{"Type","" + (int)credential.Type }}));
+                        break;
 
-                string password = AutoDecoder.Decode(credential.CredentialBlob);
-                logins.Add(new LoginInfo(credential.TargetName, credential.UserName, password));
+                }
+                
             }
 
             return ApplicationInfo.Single("Windows Credential Manager", logins);
