@@ -8,11 +8,11 @@ namespace Lazagne.Net.Modules.Windows
     public class Wsl : IModule
     {
         private static string LocalAppdataPackages = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), "Packages");
-        private static HashSet<string> InvalidHashes = new HashSet<string>() { "!","*", "x"};
+        private static HashSet<string> InvalidHashes = new HashSet<string>() { "!", "*", "x" };
 
         static Wsl()
         {
-            ModuleHandler.Register(new Wsl());
+            ModuleHandler.Register("Windows Subsystem for Linux", new Wsl());
         }
 
         public IEnumerable<ApplicationInfo> GetCredentials()
@@ -23,12 +23,8 @@ namespace Lazagne.Net.Modules.Windows
                 string shadowPath = Path.Combine(dir, "LocalState/rootfs/etc/shadow");
                 if (File.Exists(shadowPath))
                 {
-                    ApplicationInfo currentInfo = new ApplicationInfo()
-                    {
-                        Name = Path.GetFileName(dir),
-                        Logins = new HashSet<LoginInfo>()
-                    };
-                    
+                    ApplicationInfo currentInfo = new ApplicationInfo(Path.GetFileName(dir), new HashSet<LoginInfo>());
+
                     using (StreamReader sr = new StreamReader(new FileStream(shadowPath, FileMode.Open, FileAccess.Read)))
                     {
                         bool isAdded = false;
@@ -38,13 +34,13 @@ namespace Lazagne.Net.Modules.Windows
                             string[] split = line.Split(':');
                             if (!InvalidHashes.Contains(split[1]))
                             {
-                                currentInfo.Logins.Add(new LoginInfo() 
-                                { 
+                                currentInfo.Logins.Add(new LoginInfo()
+                                {
                                     Login = split[0],
                                     Password = split[1]
                                 });
 
-                                if(isAdded == false)
+                                if (isAdded == false)
                                 {
                                     infos.Add(currentInfo);
                                     isAdded = true;

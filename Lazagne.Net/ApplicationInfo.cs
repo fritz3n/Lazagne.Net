@@ -9,7 +9,7 @@ namespace Lazagne.Net
         public string Name { get; set; }
         public ICollection<LoginInfo> Logins { get; set; }
 
-        public ApplicationInfo(string name, List<LoginInfo> logins)
+        public ApplicationInfo(string name, ICollection<LoginInfo> logins)
         {
             Name = name;
             Logins = logins;
