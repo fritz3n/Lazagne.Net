@@ -12,12 +12,16 @@ namespace Lazagne.Net
 
         static ModuleHandler()
         {
-            Type[] types = Assembly.GetEntryAssembly().GetTypes();
-            foreach (Type type in types)
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
             {
-                if (typeof(IModule).IsAssignableFrom(type))
+                Type[] types = assembly.GetTypes();
+                foreach (Type type in types)
                 {
-                    RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+                    if (typeof(IModule).IsAssignableFrom(type))
+                    {
+                        RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+                    }
                 }
             }
         }

@@ -43,32 +43,33 @@ namespace Lazagne.Net.Modules.ChromiumBased
 
             foreach ((string path, byte[] key) databaseInfo in databases)
             {
-                using TemporaryCopy temp = new TemporaryCopy(databaseInfo.path);
-                using Database database = Database.FromFile(temp.TempPath);
-
-                foreach (EncryptedLoginInfo encryptedLogin in database.GetLogins())
+                using (TemporaryCopy temp = new TemporaryCopy(databaseInfo.path))
+                using (Database database = Database.FromFile(temp.TempPath))
                 {
-                    string password;
-                    try
+
+                    foreach (EncryptedLoginInfo encryptedLogin in database.GetLogins())
                     {
-                        password = Encoding.UTF8.GetString(Crypto.Unprotect(encryptedLogin.EncryptedPassword));
-                    }
-                    catch (Exception)
-                    {
+                        string password;
                         try
                         {
-                            password = Encoding.UTF8.GetString(Crypto.Decrypt(encryptedLogin.EncryptedPassword, databaseInfo.key));
+                            password = Encoding.UTF8.GetString(Crypto.Unprotect(encryptedLogin.EncryptedPassword));
                         }
                         catch (Exception)
                         {
-                            continue;
+                            try
+                            {
+                                password = Encoding.UTF8.GetString(Crypto.Decrypt(encryptedLogin.EncryptedPassword, databaseInfo.key));
+                            }
+                            catch (Exception)
+                            {
+                                continue;
+                            }
+
                         }
 
+                        yield return new LoginInfo() { Url = encryptedLogin.Url, Login = encryptedLogin.Login, Password = password, AdditionalData = encryptedLogin.AdditionalData };
                     }
-
-                    yield return new LoginInfo() { Url = encryptedLogin.Url, Login = encryptedLogin.Login, Password = password, AdditionalData = encryptedLogin.AdditionalData };
                 }
-
             }
         }
 
@@ -79,7 +80,7 @@ namespace Lazagne.Net.Modules.ChromiumBased
                 .Replace("{APPDATA}", Environment.GetEnvironmentVariable("AppData"));
 
 
-            string profilePath = Path.Join(userData, "Local State");
+            string profilePath = Path.Combine(userData, "Local State");
 
             List<(string path, byte[] key)> databases = new List<(string path, byte[] key)>();
 
@@ -107,7 +108,7 @@ namespace Lazagne.Net.Modules.ChromiumBased
             }
 
             byte[] encryptedKey = (byte[])state["os_crypt"]["encrypted_key"];
-            byte[] key = Crypto.Unprotect(encryptedKey[5..]);
+            byte[] key = Crypto.Unprotect(new ArraySegment<byte>(encryptedKey, 5, encryptedKey.Length - 5));
 
 
             foreach (string profile in profiles)
@@ -115,7 +116,7 @@ namespace Lazagne.Net.Modules.ChromiumBased
                 string[] files;
                 try
                 {
-                    files = Directory.GetFiles(Path.Join(userData, profile));
+                    files = Directory.GetFiles(Path.Combine(userData, profile));
                 }
                 catch (Exception)
                 {

@@ -17,11 +17,13 @@ namespace Lazagne.Net.Utillity
         public static string Decode(byte[] buffer)
         {
 
-            using MemoryStream memory = new MemoryStream(buffer);
-
             Ude.CharsetDetector cdet = new Ude.CharsetDetector();
-            cdet.Feed(memory);
-            cdet.DataEnd();
+            using (MemoryStream memory = new MemoryStream(buffer))
+            {
+
+                cdet.Feed(memory);
+                cdet.DataEnd();
+            }
 
             if (cdet.Charset == null)
                 return null;
