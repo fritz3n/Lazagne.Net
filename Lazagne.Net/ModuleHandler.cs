@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Lazagne.Net
 {
-    static class ModuleHandler
+    public static class ModuleHandler
     {
         private static Dictionary<string, IModule> modules = new Dictionary<string, IModule>();
 
@@ -24,7 +24,7 @@ namespace Lazagne.Net
 
         public static void Register(string name, IModule module) => modules.Add(name, module);
 
-        public static List<ApplicationInfo> GetCredentials()
+        public static IEnumerable<ApplicationInfo> GetCredentials()
         {
             List<ApplicationInfo> applications = new List<ApplicationInfo>();
 

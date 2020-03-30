@@ -15,7 +15,7 @@ namespace Lazagne.Net
             Logins = logins;
         }
 
-        public static List<ApplicationInfo> Single(string name, List<LoginInfo> logins) => new List<ApplicationInfo>() { new ApplicationInfo(name, logins) };
+        public static IEnumerable<ApplicationInfo> Single(string name, ICollection<LoginInfo> logins) => new List<ApplicationInfo>() { new ApplicationInfo(name, logins) };
 
 
         public override string ToString()

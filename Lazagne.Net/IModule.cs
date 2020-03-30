@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Lazagne.Net
 {
-    interface IModule
+    public interface IModule
     {
         IEnumerable<ApplicationInfo> GetCredentials();
     }
